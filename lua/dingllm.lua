@@ -121,7 +121,6 @@ local function get_prompt(opts)
 		print("Debug: Visual selection prompt: " .. prompt)
 		if replace then
 			vim.api.nvim_command("normal! d")
-			vim.api.nvim_command("normal! k")
 		else
 			vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", false, true, true), "nx", false)
 		end
@@ -143,22 +142,20 @@ function M.handle_anthropic_spec_data(data_stream, event_state)
 			end
 		end
 	end
+end
 
-	function M.handle_openai_spec_data(data_stream)
-		if data_stream:match('"delta":') then
-			local json = vim.json.decode(data_stream)
-			if json.choices and json.choices[1] and json.choices[1].delta then
-				local content = json.choices[1].delta.content
-				if content then
-					M.write_string_at_cursor(content)
-				end
+function M.handle_openai_spec_data(data_stream)
+	if data_stream:match('"delta":') then
+		local json = vim.json.decode(data_stream)
+		if json.choices and json.choices[1] and json.choices[1].delta then
+			local content = json.choices[1].delta.content
+			if content then
+				M.write_string_at_cursor(content)
 			end
 		end
 	end
-
-	print("Error: API key is missing. Please set the ANTHROPIC_API_KEY environment variable.")
-	return
 end
+
 local group = vim.api.nvim_create_augroup("DING_LLM_AutoGroup", { clear = true })
 local active_job = nil
 
